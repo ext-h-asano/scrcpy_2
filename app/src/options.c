@@ -113,6 +113,10 @@ const struct scrcpy_options scrcpy_options_default = {
     .angle = NULL,
     .vd_destroy_content = true,
     .vd_system_decorations = true,
+    .list_cameras = false,
+    .list_camera_sizes = false,
+    .disable_audio = false,
+    .external_control_port = 0,
 };
 
 enum sc_orientation

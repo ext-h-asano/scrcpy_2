@@ -618,12 +618,13 @@ sc_server_connect_to(struct sc_server *server, struct sc_server_info *info) {
             }
         }
 
-        if (control) {
-            control_socket =
-                net_accept_intr(&server->intr, tunnel->server_socket);
-            if (control_socket == SC_SOCKET_NONE) {
-                goto fail;
-            }
+        // Always try to accept/connect the control socket regardless of the control flag
+        control_socket =
+            net_accept_intr(&server->intr, tunnel->server_socket);
+        if (control_socket == SC_SOCKET_NONE) {
+            // If accept failed (e.g. interrupted), treat it as a failure
+            // even if control is false, to maintain simpler logic for now.
+            goto fail;
         }
     } else {
         uint32_t tunnel_host = server->params.tunnel_host;
@@ -664,19 +665,23 @@ sc_server_connect_to(struct sc_server *server, struct sc_server_info *info) {
             }
         }
 
-        if (control) {
-            if (!video && !audio) {
-                control_socket = first_socket;
-            } else {
-                control_socket = net_socket();
-                if (control_socket == SC_SOCKET_NONE) {
-                    goto fail;
-                }
-                bool ok = net_connect_intr(&server->intr, control_socket,
-                                           tunnel_host, tunnel_port);
-                if (!ok) {
-                    goto fail;
-                }
+        // Always try to accept/connect the control socket regardless of the control flag
+        if (!video && !audio) {
+            // If control is the first and only socket
+            control_socket = first_socket;
+        } else {
+            // If video or audio socket already exists, create a new one for control
+            control_socket = net_socket();
+            if (control_socket == SC_SOCKET_NONE) {
+                goto fail;
+            }
+            bool ok = net_connect_intr(&server->intr, control_socket,
+                                       tunnel_host, tunnel_port);
+            if (!ok) {
+                // Explicitly close the newly created socket on connection failure
+                net_close(control_socket);
+                control_socket = SC_SOCKET_NONE; // Ensure it's marked as invalid
+                goto fail;
             }
         }
     }

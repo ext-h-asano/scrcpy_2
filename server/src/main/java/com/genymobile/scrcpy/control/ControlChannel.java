@@ -21,4 +21,8 @@ public final class ControlChannel {
     public void send(DeviceMessage msg) throws IOException {
         writer.write(msg);
     }
+
+    public DeviceMessageWriter getWriter() {
+        return writer;
+    }
 }

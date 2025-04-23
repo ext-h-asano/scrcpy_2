@@ -277,13 +277,9 @@ struct scrcpy_options {
     sc_tick audio_output_buffer;
     sc_tick time_limit;
     sc_tick screen_off_timeout;
-#ifdef HAVE_V4L2
     const char *v4l2_device;
     sc_tick v4l2_buffer;
-#endif
-#ifdef HAVE_USB
     bool otg;
-#endif
     bool show_touches;
     bool fullscreen;
     bool always_on_top;
@@ -314,6 +310,14 @@ struct scrcpy_options {
     bool require_audio;
     bool kill_adb_on_close;
     bool camera_high_speed;
+    const char *display_buffer;
+    bool list_encoders;
+    bool list_displays;
+    bool list_v4l2_devices;
+    bool list_cameras;
+    bool list_camera_sizes;
+    bool disable_audio;
+    uint16_t external_control_port;
 #define SC_OPTION_LIST_ENCODERS 0x1
 #define SC_OPTION_LIST_DISPLAYS 0x2
 #define SC_OPTION_LIST_CAMERAS 0x4
